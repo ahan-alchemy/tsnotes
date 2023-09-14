@@ -22,6 +22,9 @@
         .timezone {
             color: blue;
         }
+        .date-locale {
+            color: red;
+        }
     </style>
 </head>
 <body>
@@ -34,7 +37,6 @@
     <div id="output"></div>
 
     <script>
-        // Global variable to keep the last date and timezone
         let lastDate = null;
         let lastTimeZone = null;
 
@@ -45,17 +47,23 @@
                 const dateStr = currentDate.toLocaleDateString();
                 const timeStr = currentDate.toLocaleTimeString();
 
-                // Check if the date or timeZone has changed, and if so, add to output
+                const storedValue = JSON.parse(localStorage.getItem("savedInputs")) || [];
+                const newEntry = {
+                    date: dateStr,
+                    timezone: timeZone,
+                    time: timeStr,
+                    text: document.getElementById("inputField").value
+                };
+                storedValue.push(newEntry);
+                localStorage.setItem("savedInputs", JSON.stringify(storedValue));
+
                 if (lastDate !== dateStr || lastTimeZone !== timeZone) {
                     addToOutputDate(dateStr, timeZone);
                     lastDate = dateStr;
                     lastTimeZone = timeZone;
                 }
 
-                // Add the time and the text to the output
-                addToOutputText(timeStr, document.getElementById("inputField").value);
-
-                // Clear the input field
+                addToOutputText(timeStr, newEntry.text);
                 document.getElementById("inputField").value = "";
             }
         }
@@ -64,6 +72,7 @@
             const outputDiv = document.getElementById("output");
             const newDateEntry = document.createElement("div");
             newDateEntry.innerText = `${date}, ${timezone}`;
+            newDateEntry.classList.add("date-locale");
             outputDiv.appendChild(newDateEntry);
         }
 
@@ -74,7 +83,6 @@
             outputDiv.appendChild(newTextEntry);
         }
 
-        // Load from local storage on page load
         window.onload = function() {
             const storedValue = JSON.parse(localStorage.getItem("savedInputs")) || [];
             storedValue.forEach(item => {
@@ -96,7 +104,12 @@
             const savedInputs = JSON.parse(localStorage.getItem("savedInputs")) || [];
             let txtContent = "";
             savedInputs.forEach(item => {
-                txtContent += `${item.date}, ${item.timezone}\n<span class="timezone">${item.time}</span>: ${item.text}\n`;
+                if (lastDate !== item.date || lastTimeZone !== item.timezone) {
+                    txtContent += `${item.date}, ${item.timezone}\n`;
+                    lastDate = item.date;
+                    lastTimeZone = item.timezone;
+                }
+                txtContent += `<span class="timezone">${item.time}</span>: ${item.text}\n`;
             });
 
             const blob = new Blob([txtContent], { type: 'text/plain' });
