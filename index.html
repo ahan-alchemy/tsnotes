@@ -11,13 +11,23 @@
             padding: 5px;
             margin-bottom: 10px;
         }
+        #inputField {
+            width: 50%;
+        }
+        #buttons {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
     </style>
 </head>
 <body>
-    <input type="text" id="inputField" placeholder="Enter your text here..." onkeyup="checkEnter(event)">
-    <button onclick="clearStorage()">Clear Storage</button>
-    <button onclick="downloadAsTxt()">Download as .txt</button>
+    <div id="buttons">
+        <button onclick="clearStorage()">Clear Storage</button>
+        <button onclick="downloadAsTxt()">Download as .txt</button>
+    </div>
 
+    <input type="text" id="inputField" placeholder="Enter your text here..." onkeyup="checkEnter(event)">
     <div id="output"></div>
 
     <script>
@@ -32,7 +42,8 @@
         function checkEnter(event) {
             if (event.key === "Enter") {
                 const text = document.getElementById("inputField").value;
-                const datetime = new Date().toLocaleString();
+                const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                const datetime = new Date().toLocaleString() + " " + timeZone;
                 addToOutput(text, datetime);
 
                 // Save to local storage
@@ -48,7 +59,7 @@
         function addToOutput(text, datetime) {
             const outputDiv = document.getElementById("output");
             const newEntry = document.createElement("div");
-            newEntry.innerText = text + " (Submitted: " + datetime + ")";
+            newEntry.innerText = `(${datetime}) ${text}`;
             outputDiv.appendChild(newEntry);
         }
 
@@ -61,7 +72,7 @@
             const savedInputs = JSON.parse(localStorage.getItem("savedInputs")) || [];
             let txtContent = "";
             savedInputs.forEach(item => {
-                txtContent += `${item.text} (Submitted: ${item.datetime})\n`;
+                txtContent += `(${item.datetime}) ${item.text}\n`;
             });
 
             const blob = new Blob([txtContent], { type: 'text/plain' });
