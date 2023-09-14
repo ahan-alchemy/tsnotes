@@ -5,10 +5,12 @@
     <title>Text Submission with Local Storage</title>
     <style>
         #output {
-            height: 200px;
+            height: calc(100vh - 100px); /* full height minus some space for the buttons and input box */
+            width: 100vw; /* full width of the viewport */
             overflow-y: scroll;
             border: 1px solid #ccc;
             padding: 5px;
+            margin-top: 10px;
             margin-bottom: 10px;
         }
         #inputField {
