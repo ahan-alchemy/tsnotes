@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Text Submission with Local Storage</title>
+    <style>
+        #output {
+            height: 200px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <input type="text" id="inputField" placeholder="Enter your text here..." onkeyup="checkEnter(event)">
+    <button onclick="clearStorage()">Clear Storage</button>
+    <button onclick="downloadAsTxt()">Download as .txt</button>
+
+    <div id="output"></div>
+
+    <script>
+        // Load from local storage on page load
+        window.onload = function() {
+            const storedValue = JSON.parse(localStorage.getItem("savedInputs")) || [];
+            storedValue.forEach(item => {
+                addToOutput(item.text, item.datetime);
+            });
+        };
+
+        function checkEnter(event) {
+            if (event.key === "Enter") {
+                const text = document.getElementById("inputField").value;
+                const datetime = new Date().toLocaleString();
+                addToOutput(text, datetime);
+
+                // Save to local storage
+                let savedInputs = JSON.parse(localStorage.getItem("savedInputs")) || [];
+                savedInputs.push({ text, datetime });
+                localStorage.setItem("savedInputs", JSON.stringify(savedInputs));
+
+                // Clear the input field
+                document.getElementById("inputField").value = "";
+            }
+        }
+
+        function addToOutput(text, datetime) {
+            const outputDiv = document.getElementById("output");
+            const newEntry = document.createElement("div");
+            newEntry.innerText = text + " (Submitted: " + datetime + ")";
+            outputDiv.appendChild(newEntry);
+        }
+
+        function clearStorage() {
+            localStorage.removeItem("savedInputs");
+            document.getElementById("output").innerHTML = "";
+        }
+
+        function downloadAsTxt() {
+            const savedInputs = JSON.parse(localStorage.getItem("savedInputs")) || [];
+            let txtContent = "";
+            savedInputs.forEach(item => {
+                txtContent += `${item.text} (Submitted: ${item.datetime})\n`;
+            });
+
+            const blob = new Blob([txtContent], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'submissions.txt';
+            link.click();
+        }
+    </script>
+</body>
+</html>
+
